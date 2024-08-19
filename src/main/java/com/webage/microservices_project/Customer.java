@@ -8,6 +8,14 @@ public class Customer {
     String password;
     String email;
 
+    // Constructor
+    public Customer(int id, String name, String password, String email) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.email = email;
+    }
+
     // Setters & Getters
     public int getId() {
         return id;
