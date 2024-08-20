@@ -1,12 +1,26 @@
 package com.webage.microservices_project.API.Model;
 
+import jakarta.annotation.Generated;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name="CUSTOMERS")
 public class Customer {
 
     // Define customer variables
-    private int id;
-    private String name;
-    private String password;
-    private String email;
+   @Id
+   @GeneratedValue(strategy = GenerationType.IDENTITY) //pri key
+    int id;
+
+    @Column(name="CUSTOMER_NAME")
+    String name;
+    String password;
+    String email;
 
 
     // No argument constructor
