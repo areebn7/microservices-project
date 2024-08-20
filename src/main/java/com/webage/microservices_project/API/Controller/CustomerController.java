@@ -16,8 +16,13 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/customers")
 public class CustomerController {
+
+    @GetMapping("/api")
+    public String homePage() {
+        return "Welcome to my REST API!";
+    }
+
     private List<Customer> customers = new ArrayList<>();
 
     public CustomerController() {
@@ -27,17 +32,16 @@ public class CustomerController {
     }
 
     // Get all customers
-    @GetMapping
+    @GetMapping("/customers")
     public List<Customer> getAllCustomers() {
         return customers;
     }
         // Get a customer by ID
-    @GetMapping("/{id}")
+    @GetMapping("/customers/{id}")
     public Customer getCustomerById(@PathVariable("id") int id) {
         Optional<Customer> customer = customers.stream()
                 .filter(c -> c.getId() == id)
                 .findFirst();
         return customer.orElse(null);
     }
-
 }
