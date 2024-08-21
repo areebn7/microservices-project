@@ -1,4 +1,4 @@
-package com.webage.microservices_project.repository;
+package com.webage.microservices_project.Repository;
 
 import org.springframework.data.repository.CrudRepository;
 

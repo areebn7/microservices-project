@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.webage.microservices_project.Model.Customer;
-import com.webage.microservices_project.repository.CustomersRepository;
+import com.webage.microservices_project.Repository.CustomersRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +43,6 @@ public class CustomerController {
     @GetMapping("/customers/{id}")
     public Optional<Customer> getCustomer(@PathVariable("id") int id) {
         return repo.findById(id);
-
     }
 
     @PostMapping("/customers")
