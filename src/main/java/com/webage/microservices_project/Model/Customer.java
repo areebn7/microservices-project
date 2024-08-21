@@ -1,4 +1,4 @@
-package com.webage.microservices_project.API.Model;
+package com.webage.microservices_project.Model;
 
 import jakarta.annotation.Generated;
 import jakarta.persistence.Column;

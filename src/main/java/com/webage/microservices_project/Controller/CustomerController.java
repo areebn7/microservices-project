@@ -1,10 +1,10 @@
-package com.webage.microservices_project.API.Controller;
+package com.webage.microservices_project.Controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.webage.microservices_project.API.Model.Customer;
-import com.webage.microservices_project.API.repository.CustomersRepository;
+import com.webage.microservices_project.Model.Customer;
+import com.webage.microservices_project.repository.CustomersRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

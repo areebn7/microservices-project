@@ -1,7 +1,8 @@
-package com.webage.microservices_project.API.repository;
+package com.webage.microservices_project.repository;
 
-import com.webage.microservices_project.API.Model.Customer;
 import org.springframework.data.repository.CrudRepository;
+
+import com.webage.microservices_project.Model.Customer;
 
 public interface CustomersRepository extends CrudRepository <Customer, Integer> {
     
