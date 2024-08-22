@@ -7,6 +7,7 @@ import com.webage.microservices_project.Model.Customer;
 import com.webage.microservices_project.Repository.CustomersRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +32,8 @@ public class CustomerController {
     CustomersRepository repo;
 
     @GetMapping
-    public String homePage() {
-        return "Welcome to my REST API!";
+    public String health() {
+        return "Welcome to the ADP Customer Management Application!";
     }
 
     @GetMapping("/customers")
@@ -46,24 +47,27 @@ public class CustomerController {
     }
 
     @PostMapping("/customers")
-    public ResponseEntity<?> addCustomer(@RequestBody Customer newCustomer) {
+    public ResponseEntity<String> addCustomer(@RequestBody Customer newCustomer) {
         // Validate input:
-        if (newCustomer.getName() == null
-                || newCustomer.getEmail() == null) {
-            return ResponseEntity.badRequest().build();
+        if (newCustomer.getName() == null || newCustomer.getEmail() == null) {
+            return ResponseEntity.badRequest().body("Name and Email are required fields.");
         }
+    
+        // Save the new customer
         newCustomer = repo.save(newCustomer);
-
-        // Location header will resemble
-        // "http://localhost:8080/customers/27"
+    
+        // Create the location URI
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(newCustomer.getId())
                 .toUri();
-
-        return ResponseEntity.created(location).build();
+    
+        // Return a response with the creation confirmation
+        return ResponseEntity.created(location)
+                .body("Customer with ID " + newCustomer.getId() + " was created successfully.");
     }
+    
 
     @PutMapping("/customers/{id}")
     public ResponseEntity<?> putCustomer(
@@ -81,13 +85,14 @@ public class CustomerController {
         // Check if the customer exists
         Optional<Customer> customerOptional = repo.findById(id);
         if (customerOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Customer with ID " + id + " does not exist.");
         }
 
         // Delete the customer
         repo.deleteById(id);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Customer with ID " + id + " was successfully deleted.");
     }
 
 }
