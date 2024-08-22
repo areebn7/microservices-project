@@ -33,7 +33,7 @@ public class CustomerController {
 
     @GetMapping
     public String health() {
-        return "Welcome to the ADP Customer Management Application!";
+        return "Service is running. Welcome to the ADP Customer Management Application!";
     }
 
     @GetMapping("/customers")
