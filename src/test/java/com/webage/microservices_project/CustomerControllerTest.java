@@ -33,8 +33,8 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void testHomePage() {
-        String result = customerController.homePage();
+    public void testHealth() {
+        String result = customerController.health();
         assertEquals("Welcome to my REST API!", result);
     }
 
