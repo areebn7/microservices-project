@@ -21,6 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.net.URI;
 import java.util.Optional;
 
+/**
+ * Controller for managing customer records in the ADP Customer Management Application.
+ * Provides endpoints for health check, CRUD operations, and partial updates on customers.
+ */
 @RestController
 @RequestMapping("/api")
 public class CustomerController {
@@ -28,21 +32,43 @@ public class CustomerController {
     @Autowired
     CustomersRepository repo;
 
+    /**
+     * Endpoint to check the health of the customer management service.
+     * 
+     * @return A string indicating that the service is running.
+     */
     @GetMapping
     public String health() {
         return "Service is running. Welcome to the ADP Customer Management Application!";
     }
 
+    /**
+     * Retrieves all customer records.
+     * 
+     * @return An iterable collection of all customers.
+     */
     @GetMapping("/customers")
     public Iterable<Customer> getAll() {
         return repo.findAll();
     }
 
+    /**
+     * Retrieves a customer record by its ID.
+     * 
+     * @param id The ID of the customer to retrieve.
+     * @return An optional containing the customer if found, otherwise empty.
+     */
     @GetMapping("/customers/{id}")
     public Optional<Customer> getCustomer(@PathVariable("id") int id) {
         return repo.findById(id);
     }
 
+    /**
+     * Adds a new customer record.
+     * 
+     * @param newCustomer The customer to add.
+     * @return A response entity with the creation status and location URI of the new customer.
+     */
     @PostMapping("/customers")
     public ResponseEntity<String> addCustomer(@RequestBody Customer newCustomer) {
         // Validate input:
@@ -65,6 +91,13 @@ public class CustomerController {
                 .body("Customer with ID " + newCustomer.getId() + " was created successfully.");
     }
 
+    /**
+     * Updates an existing customer record by replacing it with the new customer data.
+     * 
+     * @param newCustomer The new customer data.
+     * @param id The ID of the customer to update.
+     * @return A response entity with the update status.
+     */
     @PutMapping("/customers/{id}")
     public ResponseEntity<String> putCustomer(
             @RequestBody Customer newCustomer,
@@ -82,6 +115,13 @@ public class CustomerController {
         return ResponseEntity.ok("Customer with ID " + id + " was updated successfully.");
     }
 
+    /**
+     * Partially updates an existing customer record with the provided data.
+     * 
+     * @param updatedCustomer The partial customer data to update.
+     * @param id The ID of the customer to update.
+     * @return A response entity with the update status.
+     */
     @PatchMapping("/customers/{id}")
     public ResponseEntity<String> patchCustomer(
             @RequestBody Customer updatedCustomer,
@@ -112,6 +152,12 @@ public class CustomerController {
         return ResponseEntity.ok("Customer with ID " + id + " was partially updated successfully.");
     }
 
+    /**
+     * Deletes a customer record by its ID.
+     * 
+     * @param id The ID of the customer to delete.
+     * @return A response entity with the deletion status.
+     */
     @DeleteMapping("/customers/{id}")
     public ResponseEntity<?> deleteCustomer(@PathVariable("id") int id) {
         // Check if the customer exists
