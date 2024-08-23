@@ -105,6 +105,9 @@ public class CustomerController {
         if (updatedCustomer.getEmail() != null) {
             existingCustomer.setEmail(updatedCustomer.getEmail());
         }
+        if (updatedCustomer.getPassword() != null) {
+            existingCustomer.setPassword(updatedCustomer.getPassword());
+        }
         // Save the updated customer
         repo.save(existingCustomer);
 
