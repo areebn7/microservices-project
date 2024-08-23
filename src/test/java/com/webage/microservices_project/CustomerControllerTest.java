@@ -12,14 +12,15 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.net.URI;
+import java.util.List;
 import java.util.Optional;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class CustomerControllerTest {
+class CustomerControllerTest {
 
     @Mock
     private CustomersRepository repo;
@@ -27,119 +28,137 @@ public class CustomerControllerTest {
     @InjectMocks
     private CustomerController customerController;
 
+    private Customer customer;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
+        customer = new Customer(1, "Areeb Nabi", "password123", "areeb.nabi@gmail.com");
     }
 
     @Test
-    public void testHealth() {
-        String result = customerController.health();
-        assertEquals("Welcome to my REST API!", result);
+    void testHealthCheck() {
+        String response = customerController.health();
+        assertEquals("Service is running. Welcome to the ADP Customer Management Application!", response);
     }
 
     @Test
-    public void testGetAllCustomers() {
-        // Arrange
-        Customer customer1 = new Customer(1, "Cristiano Ronaldo", "cristiano@example.com", "password123");
-        Customer customer2 = new Customer(2, "Jane Doe", "jane@example.com", "password456");
-        when(repo.findAll()).thenReturn(Arrays.asList(customer1, customer2));
-
-        // Act
-        Iterable<Customer> result = customerController.getAll();
-
-        // Assert
-        assertEquals(Arrays.asList(customer1, customer2), result);
+    void testGetAllCustomers() {
+        when(repo.findAll()).thenReturn(List.of(customer));
+        Iterable<Customer> customers = customerController.getAll();
+        assertEquals(1, ((List<Customer>) customers).size());
+        verify(repo, times(1)).findAll();
     }
 
     @Test
-    public void testGetCustomerById() {
-        // Arrange
-        Customer customer = new Customer(1, "Cristiano Ronaldo", "cristiano@example.com", "password123");
-        when(repo.findById(1)).thenReturn(Optional.of(customer));
+    void testGetCustomerById_Found() {
+        when(repo.findById(anyInt())).thenReturn(Optional.of(customer));
+        Optional<Customer> foundCustomer = customerController.getCustomer(1);
+        assertEquals("Areeb Nabi", foundCustomer.get().getName());
+        verify(repo, times(1)).findById(anyInt());
+    }
 
-        // Act
-        Optional<Customer> result = customerController.getCustomer(1);
-
-        // Assert
-        assertEquals(Optional.of(customer), result);
+    @Test
+    void testGetCustomerById_NotFound() {
+        when(repo.findById(anyInt())).thenReturn(Optional.empty());
+        Optional<Customer> foundCustomer = customerController.getCustomer(1);
+        assertEquals(Optional.empty(), foundCustomer);
+        verify(repo, times(1)).findById(anyInt());
     }
 
     @Disabled
     @Test
-    public void testAddCustomer_Success() {
-        // Arrange
-        Customer customer = new Customer(1, "Cristiano Ronaldo", "cristiano@example.com", "password123");
+    void testAddCustomer_Success() {
         when(repo.save(any(Customer.class))).thenReturn(customer);
 
-        // Act
-        ResponseEntity<?> response = customerController.addCustomer(customer);
+        Customer newCustomer = new Customer(2, "John Doe", "johndoe456", "john.doe@example.com");
+        ResponseEntity<String> response = customerController.addCustomer(newCustomer);
 
-        // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(URI.create("/api/customers/1"), response.getHeaders().getLocation());
+        verify(repo, times(1)).save(any(Customer.class));
     }
 
     @Test
-    public void testAddCustomer_Invalid() {
-        // Arrange
-        Customer customer = new Customer(0, null, "cristiano@example.com", "password123");
+    void testAddCustomer_BadRequest() {
+        Customer newCustomer = new Customer(2, null, null, null);
+        ResponseEntity<String> response = customerController.addCustomer(newCustomer);
 
-        // Act
-        ResponseEntity<?> response = customerController.addCustomer(customer);
-
-        // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Name and Email are required fields.", response.getBody());
+        verify(repo, times(0)).save(any(Customer.class));
     }
 
     @Test
-    public void testPutCustomer_Success() {
-        // Arrange
-        Customer customer = new Customer(1, "Cristiano Ronaldo", "cristiano@example.com", "password123");
+    void testPutCustomer_Success() {
+        when(repo.existsById(anyInt())).thenReturn(true);
         when(repo.save(any(Customer.class))).thenReturn(customer);
 
-        // Act
-        ResponseEntity<?> response = customerController.putCustomer(customer, 1);
+        ResponseEntity<String> response = customerController.putCustomer(customer, 1);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(repo, times(1)).existsById(anyInt());
+        verify(repo, times(1)).save(any(Customer.class));
     }
 
     @Test
-    public void testPutCustomer_Invalid() {
-        // Arrange
-        Customer customer = new Customer(2, "Cristiano Ronaldo", "cristiano@example.com", "password123");
+    void testPutCustomer_NotFound() {
+        when(repo.existsById(anyInt())).thenReturn(false);
 
-        // Act
-        ResponseEntity<?> response = customerController.putCustomer(customer, 1);
+        ResponseEntity<String> response = customerController.putCustomer(customer, 1);
 
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
-    public void testDeleteCustomer_Success() {
-        // Arrange
-        Customer customer = new Customer(1, "Cristiano Ronaldo", "cristiano@example.com", "password123");
-        when(repo.findById(1)).thenReturn(Optional.of(customer));
-
-        // Act
-        ResponseEntity<?> response = customerController.deleteCustomer(1);
-
-        // Assert
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(repo, times(1)).deleteById(1);
-    }
-
-    @Test
-    public void testDeleteCustomer_NotFound() {
-        // Arrange
-        when(repo.findById(1)).thenReturn(Optional.empty());
-
-        // Act
-        ResponseEntity<?> response = customerController.deleteCustomer(1);
-
-        // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Customer with ID 1 not found.", response.getBody());
+        verify(repo, times(1)).existsById(anyInt());
+        verify(repo, times(0)).save(any(Customer.class));
+    }
+
+    @Test
+    void testPatchCustomer_Success() {
+        when(repo.findById(anyInt())).thenReturn(Optional.of(customer));
+        when(repo.save(any(Customer.class))).thenReturn(customer);
+
+        Customer updatedCustomer = new Customer();
+        updatedCustomer.setName("Updated Name");
+
+        ResponseEntity<String> response = customerController.patchCustomer(updatedCustomer, 1);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(repo, times(1)).findById(anyInt());
+        verify(repo, times(1)).save(any(Customer.class));
+    }
+
+    @Test
+    void testPatchCustomer_NotFound() {
+        when(repo.findById(anyInt())).thenReturn(Optional.empty());
+
+        Customer updatedCustomer = new Customer();
+        updatedCustomer.setName("Updated Name");
+
+        ResponseEntity<String> response = customerController.patchCustomer(updatedCustomer, 1);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(repo, times(1)).findById(anyInt());
+        verify(repo, times(0)).save(any(Customer.class));
+    }
+
+    @Test
+    void testDeleteCustomer_Success() {
+        when(repo.findById(anyInt())).thenReturn(Optional.of(customer));
+
+        ResponseEntity<?> response = customerController.deleteCustomer(1);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(repo, times(1)).deleteById(anyInt());
+    }
+
+    @Test
+    void testDeleteCustomer_NotFound() {
+        when(repo.findById(anyInt())).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = customerController.deleteCustomer(1);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(repo, times(1)).findById(anyInt());
+        verify(repo, times(0)).deleteById(anyInt());
     }
 }
