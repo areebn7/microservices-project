@@ -16,9 +16,10 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api")
 public class CustomerController {
 
-    @GetMapping("/api")
+    @GetMapping
     public String homePage() {
         return "Welcome to my REST API!";
     }
